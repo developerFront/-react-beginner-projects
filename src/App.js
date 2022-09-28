@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import './index.scss';
+import { Link } from 'react-router-dom';
 
 const questions = [
   {
@@ -8,7 +10,11 @@ const questions = [
   },
   {
     title: 'Компонент - это ... ',
-    variants: ['приложение', 'часть приложения или страницы', 'то, что я не знаю что такое'],
+    variants: [
+      'приложение',
+      'часть приложения или страницы',
+      'то, что я не знаю что такое',
+    ],
     correct: 1,
   },
   {
@@ -22,37 +28,66 @@ const questions = [
   },
 ];
 
-function Result() {
+function Result({ correct, clickStart }) {
   return (
-    <div className="result">
-      <img src="https://cdn-icons-png.flaticon.com/512/2278/2278992.png" />
-      <h2>Вы отгадали 3 ответа из 10</h2>
-      <button>Попробовать снова</button>
+    <div className='result'>
+      <img src='https://cdn-icons-png.flaticon.com/512/2278/2278992.png' />
+      <h2>
+        Вы отгадали {correct} ответа из {questions.length}
+      </h2>
+      <Link to='/'>
+        <button onClick={clickStart}>Попробовать снова</button>
+      </Link>
     </div>
   );
 }
 
-function Game() {
+function Game({ step, question, onClickVariant }) {
+  const percentage = Math.round((step / questions.length) * 100);
+
   return (
     <>
-      <div className="progress">
-        <div style={{ width: '50%' }} className="progress__inner"></div>
+      <div className='progress'>
+        <div
+          style={{ width: `${percentage}%` }}
+          className='progress__inner'
+        ></div>
       </div>
-      <h1>Что такое useState?</h1>
+      <h1>{question.title}</h1>
       <ul>
-        <li>Это функция для хранения данных компонента</li>
-        <li>Это глобальный стейт</li>
-        <li>Это когда на ты никому не нужен</li>
+        {question.variants.map((text, index) => (
+          <li key={index} onClick={() => onClickVariant(index)}>
+            {text}
+          </li>
+        ))}
       </ul>
     </>
   );
 }
 
 function App() {
+  const [step, setStep] = useState(0);
+  const [correct, setCorrect] = useState(0);
+
+  const question = questions[step];
+
+  const onClickVariant = (index) => {
+    setStep(step + 1);
+    if (index === question.correct) {
+      setCorrect(correct + 1);
+    }
+  };
+  const clickStart = () => {
+    setStep(0);
+    setCorrect(0);
+  };
   return (
-    <div className="App">
-      <Game />
-      {/* <Result /> */}
+    <div className='App'>
+      {step !== questions.length ? (
+        <Game step={step} question={question} onClickVariant={onClickVariant} />
+      ) : (
+        <Result correct={correct} clickStart={clickStart} />
+      )}
     </div>
   );
 }
